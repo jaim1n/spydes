@@ -1,5 +1,5 @@
 # spydes
-A CLI-based card game inspired by Spades. 
+A Python based CLI card game inspired by Spades. 
 
 This version follows two player rules, with Player 1 (you) going up against Player 2 (AI). A coin toss is used at the beginning of every game for fairness; player must choose either heads or tails.
 
