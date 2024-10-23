@@ -337,8 +337,7 @@ def main():
                 # Perform the coin toss with improved randomization
                 coin_toss_result = random.choice(['heads', 'tails'])
                 player2_lead = (player_choice != coin_toss_result)
-                coin_toss_winner = "Player 2" if player2_lead else f4
-                "{player_name}"
+                coin_toss_winner = "Player 2" if player2_lead else f"{player_name}"
                 print(f"\nThe coin landed on {coin_toss_result}. {coin_toss_winner} won the toss and will draw the first card.\n")
 
             # Alternate lead player in subsequent rounds
