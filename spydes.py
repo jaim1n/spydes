@@ -63,6 +63,7 @@ def display_player1_hand(player1_hand):
             print(f"{RED_TEXT}{symbol}: {cards}{RESET_TEXT}")
         else:
             print(f"{symbol}: {cards}")
+    print()
 
 # Function to get a bid from Player 1
 def get_player1_bid(player1_hand):
@@ -85,14 +86,14 @@ def get_player1_bid(player1_hand):
 
     while True:
         try:
-            bid = int(input(f"\nEnter your bid ({guaranteed_tricks} - 13): "))
-            print()
+            bid = int(input(f"Enter your bid ({guaranteed_tricks} - 13): "))
             if bid < guaranteed_tricks:
                 trick_word = "trick" if guaranteed_tricks == 1 else "tricks"
-                print(f"\nYou have {guaranteed_tricks} guaranteed {trick_word}. Try again.")
+                print(f"You have {guaranteed_tricks} guaranteed {trick_word}. Try again.")
             elif bid > 13:
                 print("You cannot bid more than 13.")
             else:
+                print()
                 return bid
         except ValueError:
             print("Invalid input. Please enter a number.")
@@ -133,35 +134,38 @@ def determine_trick_winner(card1, card2, lead_suit):
 def get_player1_card(player1_hand, lead_suit, spades_broken, is_lead):
     sorted_hand = sorted(player1_hand, key=lambda x: (SUITS.index(x[1]), RANKS.index(x[0])))
     display_player1_hand(sorted_hand)
-    print("\nYour turn. Select a card to play:")
+    print("Select a card to play:")
     for idx, card in enumerate(sorted_hand):
         print(f"{idx + 1}: {format_card(card)}")
     print()
 
     while True:
         try:
-            choice = int(input("Enter the number of the card you want to play: ")) - 1
+            choice = int(input("Enter the number of the card want to play: ")) - 1
             selected_card = sorted_hand[choice]
 
             if is_lead:
                 if selected_card[1] == 'Spades' and not spades_broken:
                     non_spade_cards = [card for card in sorted_hand if card[1] != 'Spades']
                     if non_spade_cards:
-                        print("\nSpades have not been broken yet. Try again.\n")
+                        print("Spades have not been broken yet. Try again.")
                         continue
                 player1_hand.remove(selected_card)
                 return selected_card
 
+            # If Player 1 is not leading, they must follow the lead suit if possible
             if lead_suit and selected_card[1] != lead_suit:
                 if any(card[1] == lead_suit for card in sorted_hand):
-                    print(f"\nYou must play a {lead_suit}. Try again.\n")
+                    # Remove the trailing 's' for grammatical purposes
+                    display_suit = lead_suit[:-1] if lead_suit.endswith('s') else lead_suit
+                    print(f"You must play a {display_suit}. Try again.")
                     continue
 
             player1_hand.remove(selected_card)
             return selected_card
 
         except (ValueError, IndexError):
-            print("\nInvalid choice. Try again.\n")
+            print("Invalid choice. Try again.")
 
 # Function for Player 2 to play a card with enhanced strategy
 def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead):
@@ -189,18 +193,42 @@ def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead):
     print(f"Player 2 plays: {format_card(card)}\n")
     return card
 
+def get_player_name():
+    if os.path.exists("player_name.txt"):
+        with open("player_name.txt", "r") as file:
+            player_name = file.read().strip()
+        if not player_name or not player_name.isalpha():
+            player_name = None
+    else:
+        player_name = None
+
+    while not player_name:
+        player_name = input("Enter your name: ").strip()
+        if not player_name.isalpha():
+            print("Invalid name. Please enter a name with only alphabetical characters (A-Z).")
+            player_name = None
+
+    # Format the name to capitalize the first letter and lowercase the rest
+    player_name = player_name.capitalize()
+    
+    with open("player_name.txt", "w") as file:
+        file.write(player_name)
+    
+    return player_name
+
 # Play a single round of the game
 def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=None, player2_lead=False, spades_broken=False):
     player1_tricks = 0
     player2_tricks = 0
     spades_message = False
     lead_suit = None
+    player_name = get_player_name()  # Get the player's name from the file
 
     for i in range(13):
         clear_terminal()
 
-        print(f"Player 1 tricks: {player1_tricks}/{player1_bid}")
-        print(f"Player 2 tricks: {player2_tricks}/{player2_bid}\n")
+        print(f"{player_name}'s tricks: {player1_tricks}/{player1_bid}")
+        print(f"Player 2's tricks: {player2_tricks}/{player2_bid}\n")
 
         if spades_message:
             print("Spades have been broken!\n")
@@ -269,6 +297,8 @@ def countdown_round(seconds=10):
 
 def main():
     clear_terminal()
+    player_name = get_player_name()
+    clear_terminal()
     print("""
                 (                          
           (     )\ )  (      .------.      
@@ -281,6 +311,8 @@ def main():
                       by jaim1n    `------'\n
     """)
 
+    print(f"Welcome, {player_name}!\n")
+
     while True:
         player1_total_score = 0
         player2_total_score = 0
@@ -290,33 +322,34 @@ def main():
 
         while player1_total_score < 500 and player2_total_score < 500 and player1_total_score > -200 and player2_total_score > -200:
 
-            # Create a new deck and deal cards
+            # Create a new deck for each round and shuffle it
             deck = create_deck()
 
-            # Coin toss choice (first round) or alternate lead
+            # Deal hands based on coin toss or alternating lead
             if round_number == 1:
                 while True:
                     player_choice = input("Choose heads (1) or tails (2) for the coin toss: ")
                     if player_choice in ['1', '2']:
                         player_choice = 'heads' if player_choice == '1' else 'tails'
                         break
-                    print("\nInvalid choice. Please enter '1' for heads or '2' for tails.\n")
+                    print("Invalid choice. Please enter '1' for heads or '2' for tails.")
 
                 # Perform the coin toss with improved randomization
                 coin_toss_result = random.choice(['heads', 'tails'])
                 player2_lead = (player_choice != coin_toss_result)
-                coin_toss_winner = "Player 2" if player2_lead else "Player 1"
+                coin_toss_winner = "Player 2" if player2_lead else f4
+                "{player_name}"
                 print(f"\nThe coin landed on {coin_toss_result}. {coin_toss_winner} won the toss and will draw the first card.\n")
 
-                # Deal hands based on coin toss result
-                if coin_toss_winner == "Player 1":
-                    player1_hand, player2_hand = deal_cards(deck)
-                else:
-                    player2_hand, player1_hand = deal_cards(deck)
-            else:
+            # Alternate lead player in subsequent rounds
+            if round_number > 1:
                 player2_lead = not player2_lead
-                lead_player = "Player 2" if player2_lead else "Player 1"
-                print(f"{lead_player} will bid last this round.\n")
+
+            # Deal cards based on who draws first
+            if player2_lead:
+                player2_hand, player1_hand = deal_cards(deck)
+            else:
+                player1_hand, player2_hand = deal_cards(deck)
 
             # Bidding phase
             if player2_lead:
@@ -336,8 +369,8 @@ def main():
 
             clear_terminal()
             print(f"{last_trick}\n")
-            print(f"Player 1 tricks: {player1_tricks}/{player1_bid}")
-            print(f"Player 2 tricks: {player2_tricks}/{player2_bid}")
+            print(f"{player_name}'s tricks: {player1_tricks}/{player1_bid}")
+            print(f"Player 2's tricks: {player2_tricks}/{player2_bid}")
 
             # Calculate round scores including sandbags
             player1_round_score, player1_sandbags = calculate_score(player1_tricks, player1_bid, player1_sandbags)
@@ -348,8 +381,8 @@ def main():
             player2_total_score += player2_round_score
 
             print(f"\n--- End of Round {round_number} ---\n")
-            print(f"Player 1 round score: {player1_round_score}, total score: {player1_total_score}, sandbags: {player1_sandbags}")
-            print(f"Player 2 round score: {player2_round_score}, total score: {player2_total_score}, sandbags: {player2_sandbags}")
+            print(f"{player_name}'s round score: {player1_round_score}, total score: {player1_total_score}, sandbags: {player1_sandbags}")
+            print(f"Player 2's round score: {player2_round_score}, total score: {player2_total_score}, sandbags: {player2_sandbags}")
 
             if player1_total_score >= 500 or player2_total_score >= 500 or player1_total_score <= -200 or player2_total_score <= -200:
                 break
@@ -358,13 +391,15 @@ def main():
             countdown_round()
             clear_terminal()
 
+        # Determine the winner
         if player1_total_score >= 500 or player2_total_score <= -200:
-            print("Player 1 wins!")
+            print(f"\n{player_name} wins!")
         elif player2_total_score >= 500 or player1_total_score <= -200:
-            print("Player 2 wins!")
+            print("\nPlayer 2 wins!")
         else:
             print("Unexpected game end condition.")
 
+        # Ask if the player wants to play again
         while True:
             play_again = input("\nWould you like to play another game? (y/n): ").strip().lower()
             if play_again == 'y':
@@ -374,7 +409,7 @@ def main():
                 print("\nThanks for playing!")
                 return
             else:
-                print("\nInvalid input. Please enter 'y' for yes or 'n' for no.")
+                print("Invalid input. Please enter 'y' for yes or 'n' for no.")
 
 if __name__ == "__main__":
     main()
