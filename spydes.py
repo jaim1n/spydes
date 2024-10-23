@@ -297,8 +297,7 @@ def countdown_round(seconds=10):
 
 def main():
     clear_terminal()
-    player_name = get_player_name()
-    clear_terminal()
+
     print("""
                 (                          
           (     )\ )  (      .------.      
@@ -310,7 +309,8 @@ def main():
    |_|    |__/                     |  \/ K|
                       by jaim1n    `------'\n
     """)
-
+    
+    player_name = get_player_name()
     print(f"Welcome, {player_name}!\n")
 
     while True:
