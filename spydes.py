@@ -254,7 +254,7 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
 
         if winner == 1:
             player1_tricks += 1
-            last_trick = f"Player 1 wins trick {i + 1} with {format_card(card1)} over {format_card(card2)}"
+            last_trick = f"{player_name} wins trick {i + 1} with {format_card(card1)} over {format_card(card2)}"
             player2_lead = False
         else:
             player2_tricks += 1
