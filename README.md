@@ -31,8 +31,8 @@ This version follows two-player rules. An AI player named *Spyder* will be your 
   - [x] Give Player 2 a unique name
 - [ ] Implement blind nil system
 - [ ] Improve AI
-- [ ] Add a way to play with four players and make appropriate changes to the game logic to accommodate four players
+- [ ] Add support for four-player games and adjust the game logic accordingly
   - [ ] Provide options for pairs or solo play
-- [ ] Work on aesthetics and user interface
+- [ ] Enhance UI (?)
 
 ASCII art generated using https://patorjk.com/software/taag/
