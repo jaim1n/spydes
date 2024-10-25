@@ -27,9 +27,10 @@ This version follows two player rules, with Player 1 (you) going up against Play
 - The game continues until one player reaches a total score of 500 or more or drops to -200 points.
 
 ## TODO
-- [x] Prompt user to input name, replacing "Player 1" and store in dictionary
-  - [ ] Give Player 2 a unique name
+- [x] Prompt user to input name replacing "Player 1" and store in dictionary
+  - [x] Give Player 2 a unique name
 - [ ] Implement blind nil system
+- [ ] Improve AI
 - [ ] Add a way to play with four players and make appropriate changes to the game logic to accommodate four players
   - [ ] Provide options for pairs or solo play
 - [ ] Work on aesthetics and user interface
