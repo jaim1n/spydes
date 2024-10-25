@@ -106,11 +106,11 @@ def get_player2_bid(player2_hand):
 
     if high_cards <= 2 and low_cards >= 8:
         bid = 0
-        print("Player 2 bids Nil.\n")
+        print("Spyder bids Nil.\n")
     else:
         bid = high_cards + spades // 2
         bid = max(1, min(13, bid))
-        print(f"Player 2 bids: {bid}\n")
+        print(f"Spyder bids: {bid}\n")
     
     return bid
 
@@ -190,7 +190,7 @@ def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead):
                 card = min(player2_hand, key=lambda x: RANKS.index(x[0]))
 
     player2_hand.remove(card)
-    print(f"Player 2 plays: {format_card(card)}\n")
+    print(f"Spyder plays: {format_card(card)}\n")
     return card
 
 def get_player_name():
@@ -228,7 +228,7 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
         clear_terminal()
 
         print(f"{player_name}'s tricks: {player1_tricks}/{player1_bid}")
-        print(f"Player 2's tricks: {player2_tricks}/{player2_bid}\n")
+        print(f"Spyder's tricks: {player2_tricks}/{player2_bid}\n")
 
         if spades_message:
             print("Spades have been broken!\n")
@@ -258,7 +258,7 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
             player2_lead = False
         else:
             player2_tricks += 1
-            last_trick = f"Player 2 wins trick {i + 1} with {format_card(card2)} over {format_card(card1)}"
+            last_trick = f"Spyder wins trick {i + 1} with {format_card(card2)} over {format_card(card1)}"
             player2_lead = True
 
     return player1_tricks, player2_tricks, last_trick
@@ -337,7 +337,7 @@ def main():
                 # Perform the coin toss with improved randomization
                 coin_toss_result = random.choice(['heads', 'tails'])
                 player2_lead = (player_choice != coin_toss_result)
-                coin_toss_winner = "Player 2" if player2_lead else f"{player_name}"
+                coin_toss_winner = "Spyder" if player2_lead else f"{player_name}"
                 print(f"\nThe coin landed on {coin_toss_result}. {coin_toss_winner} won the toss and will draw the first card.\n")
 
             # Alternate lead player in subsequent rounds
@@ -369,7 +369,7 @@ def main():
             clear_terminal()
             print(f"{last_trick}\n")
             print(f"{player_name}'s tricks: {player1_tricks}/{player1_bid}")
-            print(f"Player 2's tricks: {player2_tricks}/{player2_bid}")
+            print(f"Spyder's tricks: {player2_tricks}/{player2_bid}")
 
             # Calculate round scores including sandbags
             player1_round_score, player1_sandbags = calculate_score(player1_tricks, player1_bid, player1_sandbags)
@@ -381,7 +381,7 @@ def main():
 
             print(f"\n--- End of Round {round_number} ---\n")
             print(f"{player_name}'s round score: {player1_round_score}, total score: {player1_total_score}, sandbags: {player1_sandbags}")
-            print(f"Player 2's round score: {player2_round_score}, total score: {player2_total_score}, sandbags: {player2_sandbags}")
+            print(f"Spyder's round score: {player2_round_score}, total score: {player2_total_score}, sandbags: {player2_sandbags}")
 
             if player1_total_score >= 500 or player2_total_score >= 500 or player1_total_score <= -200 or player2_total_score <= -200:
                 break
@@ -394,7 +394,7 @@ def main():
         if player1_total_score >= 500 or player2_total_score <= -200:
             print(f"\n{player_name} wins!")
         elif player2_total_score >= 500 or player1_total_score <= -200:
-            print("\nPlayer 2 wins!")
+            print("\nSpyder wins!")
         else:
             print("Unexpected game end condition.")
 
