@@ -35,4 +35,5 @@ This version follows two-player rules. An AI player named *Spyder* will be your 
   - [ ] Provide options for pairs or solo play
 - [ ] Enhance UI (?)
 
+#### Credits
 ASCII art generated using https://patorjk.com/software/taag/
