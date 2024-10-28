@@ -24,10 +24,9 @@ This version follows two-player rules. An AI player named *Spyder* will be your 
 - Overbidding results in a sandbag per overtrick and earns 1 point each. A 100-point penalty is applied every 10 sandbags.
 - A successful nil bid earns 100 points; a failed nil bid deducts 100 points.
 - A successful blind nil bid earns 200 points; a failed blind nil bid deducts 200 points.
-- If a player's score reaches 500 or more, they win; a score of -200 or lower results in a loss.
   
 ### Winning:
-- The game continues until one player reaches a total score of 500 or more or drops to -200 points.
+- If a player's score reaches 500 or more, they win; a score of -200 or lower results in a loss.
 
 ## TODO
 - [x] Prompt user to input name replacing "Player 1" and store in dictionary
