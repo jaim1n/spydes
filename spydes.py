@@ -141,7 +141,7 @@ def get_player1_card(player1_hand, lead_suit, spades_broken, is_lead):
 
     while True:
         try:
-            choice = int(input("Enter the number of the card want to play: ")) - 1
+            choice = int(input("Enter the number of the card you want to play: ")) - 1
             selected_card = sorted_hand[choice]
 
             if is_lead:
@@ -153,10 +153,8 @@ def get_player1_card(player1_hand, lead_suit, spades_broken, is_lead):
                 player1_hand.remove(selected_card)
                 return selected_card
 
-            # If Player 1 is not leading, they must follow the lead suit if possible
             if lead_suit and selected_card[1] != lead_suit:
                 if any(card[1] == lead_suit for card in sorted_hand):
-                    # Remove the trailing 's' for grammatical purposes
                     display_suit = lead_suit[:-1] if lead_suit.endswith('s') else lead_suit
                     print(f"You must play a {display_suit}. Try again.")
                     continue
@@ -168,7 +166,7 @@ def get_player1_card(player1_hand, lead_suit, spades_broken, is_lead):
             print("Invalid choice. Try again.")
 
 # Function for Player 2 to play a card with enhanced strategy
-def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead):
+def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead, bid):
     if is_lead:
         if spades_broken:
             card = min(player2_hand, key=lambda x: RANKS.index(x[0]))
@@ -193,6 +191,7 @@ def get_player2_card(player2_hand, lead_suit, spades_broken, is_lead):
     print(f"Spyder plays: {format_card(card)}\n")
     return card
 
+# Retrieve the player's name from file or input
 def get_player_name():
     if os.path.exists("player_name.txt"):
         with open("player_name.txt", "r") as file:
@@ -208,7 +207,6 @@ def get_player_name():
             print("Invalid name. Please enter a name with only alphabetical characters (A-Z).")
             player_name = None
 
-    # Format the name to capitalize the first letter and lowercase the rest
     player_name = player_name.capitalize()
     
     with open("player_name.txt", "w") as file:
@@ -222,7 +220,7 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
     player2_tricks = 0
     spades_message = False
     lead_suit = None
-    player_name = get_player_name()  # Get the player's name from the file
+    player_name = get_player_name()
 
     for i in range(13):
         clear_terminal()
@@ -238,13 +236,13 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
             print(f"{last_trick}\n")
 
         if player2_lead:
-            card2 = get_player2_card(player2_hand, lead_suit, spades_broken, is_lead=True)
+            card2 = get_player2_card(player2_hand, lead_suit, spades_broken, is_lead=True, bid=player2_bid)
             lead_suit = card2[1]
             card1 = get_player1_card(player1_hand, lead_suit, spades_broken, is_lead=False)
         else:
             card1 = get_player1_card(player1_hand, lead_suit, spades_broken, is_lead=True)
             lead_suit = card1[1]
-            card2 = get_player2_card(player2_hand, lead_suit, spades_broken, is_lead=False)
+            card2 = get_player2_card(player2_hand, lead_suit, spades_broken, is_lead=False, bid=player2_bid)
 
         if not spades_broken and (card1[1] == 'Spades' or card2[1] == 'Spades'):
             spades_broken = True
@@ -264,8 +262,13 @@ def play_round(player1_hand, player2_hand, player1_bid, player2_bid, last_trick=
     return player1_tricks, player2_tricks, last_trick
 
 # Calculate the score based on bids, tricks won, and sandbags
-def calculate_score(tricks, bid, sandbags):
-    if bid == 0:
+def calculate_score(tricks, bid, sandbags, blind_nil=False):
+    if blind_nil:
+        if tricks == 0:
+            return 200, sandbags
+        else:
+            return -200, sandbags
+    elif bid == 0:
         if tricks == 0:
             return 100, sandbags
         else:
@@ -284,9 +287,9 @@ def calculate_score(tricks, bid, sandbags):
 # Countdown to start of game  
 def countdown_game(seconds=3):
     for i in range(seconds, 0, -1):
-        # \r moves the cursor to the beginning of the line
         print(f"\rGame starts in {i}...", end='', flush=True)
         time.sleep(1)
+    print("\n")
 
 # Countdown to next round
 def countdown_round(seconds=10):
@@ -294,7 +297,9 @@ def countdown_round(seconds=10):
     for i in range(seconds, 0, -1):
         print(f"\rRound ends in {i}...", end='', flush=True)
         time.sleep(1)
+    print("\n")
 
+# Main game function
 def main():
     clear_terminal()
 
@@ -309,7 +314,7 @@ def main():
    |_|    |__/                     |  \/ K|
                       by jaim1n    `------'\n
     """)
-    
+
     player_name = get_player_name()
     print(f"Welcome, {player_name}!\n")
 
@@ -321,47 +326,73 @@ def main():
         round_number = 1
 
         while player1_total_score < 500 and player2_total_score < 500 and player1_total_score > -200 and player2_total_score > -200:
-
-            # Create a new deck for each round and shuffle it
             deck = create_deck()
 
-            # Deal hands based on coin toss or alternating lead
+            # Initialize blind nil flags before the bidding phase
+            player1_blind_nil = False
+            player2_blind_nil = False
+
             if round_number == 1:
                 while True:
                     player_choice = input("Choose heads (1) or tails (2) for the coin toss: ")
                     if player_choice in ['1', '2']:
                         player_choice = 'heads' if player_choice == '1' else 'tails'
                         break
-                    print("Invalid choice. Please enter '1' for heads or '2' for tails.")
+                    print("Invalid choice. Please enter '1' or '2'.")
 
-                # Perform the coin toss with improved randomization
                 coin_toss_result = random.choice(['heads', 'tails'])
                 player2_lead = (player_choice != coin_toss_result)
                 coin_toss_winner = "Spyder" if player2_lead else f"{player_name}"
                 print(f"\nThe coin landed on {coin_toss_result}. {coin_toss_winner} won the toss and will draw the first card.\n")
 
-            # Alternate lead player in subsequent rounds
             if round_number > 1:
                 player2_lead = not player2_lead
 
-            # Deal cards based on who draws first
             if player2_lead:
                 player2_hand, player1_hand = deal_cards(deck)
             else:
                 player1_hand, player2_hand = deal_cards(deck)
 
-            # Bidding phase
             if player2_lead:
-                player1_bid = get_player1_bid(player1_hand)
+                print("1. View your cards and bid")
+                print("2. Bid Blind Nil (200 points if successful, -200 if failed)")
+                while True:
+                    choice = input("Choose 1 or 2: ").strip()
+                    print()
+                    if choice == '1':
+                        player1_bid = get_player1_bid(player1_hand)
+                        player1_blind_nil = False
+                        break
+                    elif choice == '2':
+                        player1_bid = 0
+                        player1_blind_nil = True
+                        print(f"{player_name} bids Blind Nil.\n")
+                        break
+                    else:
+                        print("Invalid choice. Please enter '1' or '2'.")
                 player2_bid = get_player2_bid(player2_hand)
             else:
                 player2_bid = get_player2_bid(player2_hand)
-                player1_bid = get_player1_bid(player1_hand)
+                print("1. View your cards and bid")
+                print("2. Bid Blind Nil (200 points if successful, -200 if failed)")
+                while True:
+                    choice = input("Choose 1 or 2: ").strip()
+                    print()
+                    if choice == '1':
+                        player1_bid = get_player1_bid(player1_hand)
+                        player1_blind_nil = False
+                        break
+                    elif choice == '2':
+                        player1_bid = 0
+                        player1_blind_nil = True
+                        print(f"{player_name} bids Blind Nil.\n")
+                        break
+                    else:
+                        print("Invalid choice. Please enter '1' or '2'.")
 
             countdown_game()
             clear_terminal()
 
-            # Play the round and get the last trick details
             player1_tricks, player2_tricks, last_trick = play_round(
                 player1_hand, player2_hand, player1_bid, player2_bid, player2_lead=player2_lead, spades_broken=False
             )
@@ -371,11 +402,13 @@ def main():
             print(f"{player_name}'s tricks: {player1_tricks}/{player1_bid}")
             print(f"Spyder's tricks: {player2_tricks}/{player2_bid}")
 
-            # Calculate round scores including sandbags
-            player1_round_score, player1_sandbags = calculate_score(player1_tricks, player1_bid, player1_sandbags)
-            player2_round_score, player2_sandbags = calculate_score(player2_tricks, player2_bid, player2_sandbags)
+            player1_round_score, player1_sandbags = calculate_score(
+                player1_tricks, player1_bid, player1_sandbags, blind_nil=player1_blind_nil
+            )
+            player2_round_score, player2_sandbags = calculate_score(
+                player2_tricks, player2_bid, player2_sandbags, blind_nil=player2_blind_nil
+            )
 
-            # Update total scores
             player1_total_score += player1_round_score
             player2_total_score += player2_round_score
 
@@ -390,7 +423,6 @@ def main():
             countdown_round()
             clear_terminal()
 
-        # Determine the winner
         if player1_total_score >= 500 or player2_total_score <= -200:
             print(f"\n{player_name} wins!")
         elif player2_total_score >= 500 or player1_total_score <= -200:
@@ -398,7 +430,6 @@ def main():
         else:
             print("Unexpected game end condition.")
 
-        # Ask if the player wants to play again
         while True:
             play_again = input("\nWould you like to play another game? (y/n): ").strip().lower()
             if play_again == 'y':
